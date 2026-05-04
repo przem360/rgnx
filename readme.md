@@ -7,11 +7,15 @@ This project contains a custom Linux system configuration built using Buildroot,
 To build the system in a clean environment (assuming Buildroot source is present), run the following commands:
 
 ```bash
-# Load the project configuration
-make rgnx_defconfig
+# Clone this repository
+git clone --recursive https://github.com/przem360/rgnx.git
+cd rgnx
 
-# Start the compilation process (downloads sources and builds images)
-make
+# Load the configuration file
+make -C buildroot-src defconfig BR2_DEFCONFIG=../configs/rgnx_defconfig
+
+# Build
+make -C buildroot-src
 ```
 Once the build is finished, the output files can be found in the output/images/ directory.
 

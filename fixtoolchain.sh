@@ -1,33 +1,47 @@
 #!/bin/bash
 
-# Definicja ścieżki (wyciągnięta do zmiennej, aby łatwo było ją zmienić)
-TOOLCHAIN_DIR="/home/pw/rgnx_buildroot/buildroot-2026.02.1/output/host/opt/ext-toolchain/i486-linux-musl"
+# Automatyczne wykrywanie katalogu, w którym znajduje się skrypt
+# Pozwala to na działanie skryptu niezależnie od nazwy folderu użytkownika
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "Rozpoczynam naprawę struktury toolchaina dla Buildroot..."
+# Ścieżka relatywna do toolchaina wewnątrz submodułu
+# Zakładamy, że folder submodułu to buildroot-src
+TOOLCHAIN_DIR="$PROJECT_ROOT/buildroot-src/output/host/opt/ext-toolchain/i486-linux-musl"
 
-# 1. Sprawdzenie czy katalog docelowy w ogóle istnieje
+echo "-------------------------------------------------------"
+echo "RGNX Toolchain Fixer"
+echo "Project root: $PROJECT_ROOT"
+echo "-------------------------------------------------------"
+
+# 1. Sprawdzenie czy katalog docelowy istnieje
+# Uwaga: Katalog ten pojawia się dopiero PO wypakowaniu toolchaina przez Buildroot
 if [ ! -d "$TOOLCHAIN_DIR" ]; then
-    echo "BŁĄD: Katalog $TOOLCHAIN_DIR nie istnieje!"
+    echo "BŁĄD: Katalog toolchaina nie został jeszcze utworzony."
+    echo "Ścieżka: $TOOLCHAIN_DIR"
+    echo "Uruchom najpierw kompilację w Buildroot (make), aby pobrać toolchain."
     exit 1
 fi
 
 cd "$TOOLCHAIN_DIR" || exit 1
 
-# 2. Tworzenie katalogu usr (jeśli nie istnieje)
+echo "Naprawa struktury w: $(pwd)"
+
+# 2. Tworzenie katalogu usr
 if [ ! -d "usr" ]; then
-    echo "Tworzenie katalogu 'usr'..."
+    echo "-> Tworzenie katalogu 'usr'..."
     mkdir -p usr
 else
-    echo "Katalog 'usr' już istnieje."
+    echo "-> Katalog 'usr' już istnieje."
 fi
 
-# 3. Tworzenie symlinka
+# 3. Tworzenie symlinka usr/include -> ../include
 if [ ! -L "usr/include" ]; then
-    echo "Tworzenie dowiązania symbolicznego usr/include -> ../include..."
+    echo "-> Tworzenie dowiązania symbolicznego usr/include -> ../include..."
     ln -s ../include usr/include
-    echo "Sukces!"
+    echo "-> Sukces!"
 else
-    echo "Symlink 'usr/include' już istnieje, pomijam."
+    echo "-> Symlink 'usr/include' już istnieje, pomijam."
 fi
 
-echo "Gotowe. Możesz teraz spróbować uruchomić 'make linux-menuconfig' w Buildroot."
+echo "-------------------------------------------------------"
+echo "Gotowe. Struktura toolchaina jest poprawna."
