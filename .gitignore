@@ -13,17 +13,23 @@
 *.swp
 .DS_Store
 
-# 3. If you ever decide to run a build that creates an 'output' 
+# 3. Ignore submodule build artifacts
+/buildroot-src/output/
+/buildroot-src/dl/
+/buildroot-src/.config
+/buildroot-src/.config.old
+
+# 4. If you ever decide to run a build that creates an 'output' 
 # folder in the root directory, ignore it too
 /output/
 
-# 4. Do NOT ignore your board and configs directories
+# 5. Do NOT ignore your board and configs directories
 # (Even if they contain files named *.config, they are safe 
 # because they are not in the root directory's ignored patterns)
 !/board/
 !/configs/
 
-# 5. Temporary stuff
+# 6. Temporary stuff
 steps.txt
 qemu.txt
 floppinux.md
