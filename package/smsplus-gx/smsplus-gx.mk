@@ -1,0 +1,15 @@
+SMSPLUS_GX_VERSION = master
+SMSPLUS_GX_SITE = $(BR2_EXTERNAL_RGNX_PATH)/package/smsplus-gx/src
+SMSPLUS_GX_SITE_METHOD = local
+SMSPLUS_GX_DEPENDENCIES = sdl
+
+define SMSPLUS_GX_BUILD_CMDS
+	$(TARGET_MAKE_ENV) $(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D) \
+		CFLAGS="$(TARGET_CFLAGS) -DMAXIM_PSG -DSCALE2X_UPSCALER -DLSB_FIRST -std=gnu99"
+endef
+
+define SMSPLUS_GX_INSTALL_TARGET_CMDS
+    $(INSTALL) -D -m 0755 $(@D)/smsplus $(TARGET_DIR)/usr/bin/smsplus
+endef
+
+$(eval $(generic-package))

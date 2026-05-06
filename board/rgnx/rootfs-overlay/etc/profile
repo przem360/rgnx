@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Prosty znak zachety, ktory zrozumie kazdy shell
+export PS1='# '
+
+# Zmienne dla SDL
+export SDL_VIDEODRIVER=fbcon
+export SDL_NOMOUSE=1
+
+# Sciezka systemowa
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin

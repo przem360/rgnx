@@ -1,0 +1,8 @@
+config BR2_PACKAGE_SMSPLUS_GX
+    bool "smsplus-gx"
+    select BR2_PACKAGE_SDL
+    help
+      SMS Plus SDL is a portable Sega Master System and 
+      Game Gear emulator. Perfect for Pentium II.
+
+      https://github.com/przem360/sms_sdl

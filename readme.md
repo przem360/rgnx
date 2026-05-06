@@ -12,21 +12,24 @@ git clone --recursive https://github.com/przem360/rgnx.git
 cd rgnx
 
 # Load the configuration file
-make -C buildroot-src defconfig BR2_DEFCONFIG=../configs/rgnx_defconfig
+make -C buildroot-src BR2_EXTERNAL=$(pwd) rgnx_defconfig
 
 # Build
-make -C buildroot-src
+make -j$(nproc) -C buildroot-src BR2_EXTERNAL=$(pwd)
 ```
 Once the build is finished, the output files can be found in the output/images/ directory.
 
 ## 2. Configuration Management Rules
 
-The project uses external configuration files stored in board/rgnx/. To ensure that your changes are persistent and not lost after a make clean or make distclean, always save them using the following rules:
+The project uses external configuration files stored in `board/rgnx/` and `configs/rgnx_defconf`. To ensure that your changes are persistent and not lost after a make clean or make distclean, always save them using the following rules:
 Buildroot Configuration (Packages & System Settings)
 
-    Edit: make menuconfig
+```
+load: make -C buildroot-src BR2_EXTERNAL=$(pwd) rgnx_defconfig
+edit: make -C buildroot-src BR2_EXTERNAL=$(pwd) menuconfig
+export: make -C buildroot-src BR2_EXTERNAL=$(pwd) savedefconfig
 
-    Save: make savedefconfig (updates configs/rgnx_defconfig)
+```
 
 Linux Kernel Configuration
 
@@ -47,9 +50,10 @@ To test the built image, use the following command (assuming you are in the Buil
 qemu-system-i386 \
     -m 128M \
     -cpu pentium2-v1 \
-    -kernel output/images/bzImage \
-    -initrd output/images/rootfs.cpio.xz \
-    -append "console=tty1"
+    -kernel buildroot-src/output/images/bzImage \
+    -initrd buildroot-src/output/images/rootfs.cpio.xz \
+    -append "console=tty1 vga=0x344" \
+    -vga std
 ```
 ## 4. Project Structure
 
@@ -65,4 +69,5 @@ Note: Always ensure that BR2_ROOTFS_OVERLAY in menuconfig points to board/rgnx/r
 
 ## 5. Troubleshooting
 
-Run `./fixtoolchain.sh` if include pathu issue will cause build failure.
+Run `./fixtoolchain.sh` if include pathu issue will cause build failure.  
+Run `make -C buildroot-src BR2_EXTERNAL=$(pwd) distclean` to clean.
