@@ -20,9 +20,25 @@ make -j$(nproc) -C buildroot-src BR2_EXTERNAL=$(pwd)
 ```
 Once the build is finished, the output files can be found in the output/images/ directory.
 
+## Install on the drive
+
+```bash
+sudo dd if=rgnx.img of=/dev/sdb bs=4M status=progress
+```
+
 ## Running in QEMU Emulator
 
 To test the built image, use the following command:
+
+```bash
+qemu-system-i386 \
+    -m 128M \
+    -cpu pentium2-v1 \
+    -drive file=buildroot-src/output/images/rgnx.img,format=raw \
+    -vga std
+```
+or:
+
 ```bash
 qemu-system-i386 \
     -m 128M \
@@ -104,7 +120,6 @@ make -C buildroot-src BR2_EXTERNAL=$(pwd)
 
 Note: Always ensure that BR2_ROOTFS_OVERLAY in menuconfig points to board/rgnx/rootfs-overlay to include your custom files in the final build.
 
-## 5. Troubleshooting
-
-Run `./fixtoolchain.sh` if include pathu issue will cause build failure.  
+## Clean
+ 
 Run `make -C buildroot-src BR2_EXTERNAL=$(pwd) distclean` to clean.

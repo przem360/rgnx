@@ -41,6 +41,170 @@ static const uint32_t upscalers_available = 1
 double real_FPS;
 Uint32 start;
 
+// Joystick support
+static SDL_Joystick *joystick = NULL;
+static uint8_t joystick_initialized = 0;
+
+static void joystick_init(void)
+{
+	int num_joysticks;
+	
+	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
+	num_joysticks = SDL_NumJoysticks();
+	
+	if (num_joysticks > 0)
+	{
+		joystick = SDL_JoystickOpen(0);
+		if (joystick)
+		{
+			fprintf(stdout, "Joystick initialized: %s\n", SDL_JoystickName(0));
+			fprintf(stdout, "Axes: %d, Buttons: %d, Hats: %d\n", 
+				SDL_JoystickNumAxes(joystick),
+				SDL_JoystickNumButtons(joystick),
+				SDL_JoystickNumHats(joystick));
+			joystick_initialized = 1;
+		}
+	}
+	else
+	{
+		fprintf(stdout, "No joystick detected\n");
+	}
+}
+
+static void joystick_close(void)
+{
+	if (joystick)
+	{
+		SDL_JoystickClose(joystick);
+		joystick = NULL;
+	}
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+	joystick_initialized = 0;
+}
+
+static void sdl_joystick_update_input(SDL_JoyAxisEvent jaxis, SDL_JoyButtonEvent jbutton, SDL_JoyHatEvent jhat, int32_t type)
+{
+	// Process axis motion (analog sticks and triggers)
+	if (type == SDL_JOYAXISMOTION)
+	{
+		if (jaxis.axis == 0) // X-axis / Left stick horizontal
+		{
+			if (jaxis.value < -16384)
+			{
+				input.pad[0] |= INPUT_LEFT;
+				input.pad[0] &= ~INPUT_RIGHT;
+			}
+			else if (jaxis.value > 16384)
+			{
+				input.pad[0] |= INPUT_RIGHT;
+				input.pad[0] &= ~INPUT_LEFT;
+			}
+			else
+			{
+				input.pad[0] &= ~INPUT_LEFT;
+				input.pad[0] &= ~INPUT_RIGHT;
+			}
+		}
+		else if (jaxis.axis == 1) // Y-axis / Left stick vertical
+		{
+			if (jaxis.value < -16384)
+			{
+				input.pad[0] |= INPUT_UP;
+				input.pad[0] &= ~INPUT_DOWN;
+			}
+			else if (jaxis.value > 16384)
+			{
+				input.pad[0] |= INPUT_DOWN;
+				input.pad[0] &= ~INPUT_UP;
+			}
+			else
+			{
+				input.pad[0] &= ~INPUT_UP;
+				input.pad[0] &= ~INPUT_DOWN;
+			}
+		}
+	}
+	
+	// Process hat/D-pad
+	if (type == SDL_JOYHATMOTION)
+	{
+		input.pad[0] &= ~(INPUT_UP | INPUT_DOWN | INPUT_LEFT | INPUT_RIGHT);
+		
+		switch (jhat.value)
+		{
+			case SDL_HAT_UP:
+				input.pad[0] |= INPUT_UP;
+				break;
+			case SDL_HAT_DOWN:
+				input.pad[0] |= INPUT_DOWN;
+				break;
+			case SDL_HAT_LEFT:
+				input.pad[0] |= INPUT_LEFT;
+				break;
+			case SDL_HAT_RIGHT:
+				input.pad[0] |= INPUT_RIGHT;
+				break;
+			case SDL_HAT_RIGHTUP:
+				input.pad[0] |= INPUT_RIGHT | INPUT_UP;
+				break;
+			case SDL_HAT_RIGHTDOWN:
+				input.pad[0] |= INPUT_RIGHT | INPUT_DOWN;
+				break;
+			case SDL_HAT_LEFTUP:
+				input.pad[0] |= INPUT_LEFT | INPUT_UP;
+				break;
+			case SDL_HAT_LEFTDOWN:
+				input.pad[0] |= INPUT_LEFT | INPUT_DOWN;
+				break;
+			case SDL_HAT_CENTERED:
+			default:
+				break;
+		}
+	}
+	
+	// Process buttons
+	if (type == SDL_JOYBUTTONDOWN || type == SDL_JOYBUTTONUP)
+	{
+		int32_t pressed = (type == SDL_JOYBUTTONDOWN) ? 1 : 0;
+		
+		switch (jbutton.button)
+		{
+			case 0: // A button / Cross
+			case 2: // X button
+				if (pressed)
+					input.pad[0] |= INPUT_BUTTON1;
+				else
+					input.pad[0] &= ~INPUT_BUTTON1;
+				break;
+			
+			case 1: // B button / Circle
+			case 3: // Y button
+				if (pressed)
+					input.pad[0] |= INPUT_BUTTON2;
+				else
+					input.pad[0] &= ~INPUT_BUTTON2;
+				break;
+			
+			case 6: // Back / Select
+				if (pressed)
+					selectpressed = 1;
+				else
+					selectpressed = 0;
+				break;
+			
+			case 7: // Start
+				if (pressed)
+					input.system |= (sms.console == CONSOLE_GG) ? INPUT_START : INPUT_PAUSE;
+				else
+					input.system &= (sms.console == CONSOLE_GG) ? ~INPUT_START : ~INPUT_PAUSE;
+				break;
+			
+			default:
+				break;
+		}
+	}
+}
+
 static void video_update(void)
 {
 	uint32_t dst_x, dst_y, dst_w, dst_h, hide_left;
@@ -539,6 +703,67 @@ void Menu()
             {
 				currentselection = 6;
 			}
+			else if (Event.type == SDL_JOYBUTTONDOWN || Event.type == SDL_JOYBUTTONUP)
+			{
+				sdl_joystick_update_input(Event.jaxis, Event.jbutton, Event.jhat, Event.type);
+			}
+			else if (Event.type == SDL_JOYHATMOTION)
+			{
+				if (Event.jhat.value == SDL_HAT_UP)
+				{
+					currentselection--;
+					if (currentselection == 0)
+						currentselection = 6;
+				}
+				else if (Event.jhat.value == SDL_HAT_DOWN)
+				{
+					currentselection++;
+					if (currentselection == 7)
+						currentselection = 1;
+				}
+				else if (Event.jhat.value == SDL_HAT_LEFT)
+				{
+					switch(currentselection)
+					{
+						case 2:
+						case 3:
+							if (save_slot > 0) save_slot--;
+						break;
+						case 4:
+						option.fullscreen--;
+						if (option.fullscreen < 0)
+							option.fullscreen = upscalers_available;
+						break;
+						case 5:
+							option.soundlevel--;
+							if (option.soundlevel < 1)
+								option.soundlevel = 4;
+						break;
+					}
+				}
+				else if (Event.jhat.value == SDL_HAT_RIGHT)
+				{
+					switch(currentselection)
+					{
+						case 2:
+						case 3:
+							save_slot++;
+							if (save_slot == 10)
+								save_slot = 9;
+						break;
+						case 4:
+							option.fullscreen++;
+							if (option.fullscreen > upscalers_available)
+								option.fullscreen = 0;
+						break;
+						case 5:
+							option.soundlevel++;
+							if (option.soundlevel > 4)
+								option.soundlevel = 1;
+						break;
+					}
+				}
+			}
         }
 
         if (pressed)
@@ -633,6 +858,8 @@ static void Cleanup(void)
 	
 	// Deinitialize audio and video output
 	Sound_Close();
+	
+	joystick_close();
 	
 	SDL_Quit();
 
@@ -731,6 +958,9 @@ int main (int argc, char *argv[])
 
 	Sound_Init();
 	
+	// Initialize joystick support
+	joystick_init();
+	
 	if (sms.display == DISPLAY_PAL) real_FPS = 1000 / 49.701459;
 	else real_FPS = 1000 / 59.922743;
 	
@@ -760,6 +990,18 @@ int main (int argc, char *argv[])
 				case SDL_KEYDOWN:
 					sdl_controls_update_input(event.key.keysym.sym, 1);
 				break;
+				case SDL_JOYAXISMOTION:
+					sdl_joystick_update_input(event.jaxis, event.jbutton, event.jhat, SDL_JOYAXISMOTION);
+				break;
+				case SDL_JOYHATMOTION:
+					sdl_joystick_update_input(event.jaxis, event.jbutton, event.jhat, SDL_JOYHATMOTION);
+				break;
+				case SDL_JOYBUTTONDOWN:
+					sdl_joystick_update_input(event.jaxis, event.jbutton, event.jhat, SDL_JOYBUTTONDOWN);
+				break;
+				case SDL_JOYBUTTONUP:
+					sdl_joystick_update_input(event.jaxis, event.jbutton, event.jhat, SDL_JOYBUTTONUP);
+				break;
 				case SDL_QUIT:
 					quit = 1;
 				break;
@@ -781,3 +1023,4 @@ int main (int argc, char *argv[])
 	
 	return 0;
 }
+
