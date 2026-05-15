@@ -34,7 +34,7 @@ To test the built image, use the following command:
 qemu-system-i386 \
     -m 128M \
     -cpu pentium2-v1 \
-    -drive file=buildroot-src/output/images/rgnx.img,format=raw \
+    -drive file=buildroot-src/output/images/rgnx_live.img,format=raw \
     -vga std
 ```
 or:
@@ -43,9 +43,9 @@ or:
 qemu-system-i386 \
     -m 128M \
     -cpu pentium2-v1 \
-    -kernel buildroot-src/output/images/bzImage \
-    -initrd buildroot-src/output/images/rootfs.cpio.xz \
-    -append "console=tty1 vga=0x344" \
+    -device ahci,id=ahci \
+    -drive file=buildroot-src/output/images/rgnx_disk.img,if=none,id=drive0,format=raw \
+    -device ide-hd,drive=drive0,bus=ahci.0 \
     -vga std
 ```
 
@@ -81,13 +81,6 @@ make -C buildroot-src BR2_EXTERNAL=$(pwd) linux-menuconfig
 # permanently update the config file in board/rgnx/linux.config
 make -C buildroot-src BR2_EXTERNAL=$(pwd) linux-update-defconfig
 ```
-Note: After updating the kernel configuration, you don't need to rebuild the entire project from scratch. Simply run the build command again:
-
-```bash
-make -C buildroot-src BR2_EXTERNAL=$(pwd)
-```
-
-Buildroot will automatically detect the configuration changes, reconfigure the kernel, and recompile only the necessary components before updating the final system image.
 
 ### BusyBox Configuration
 
@@ -102,11 +95,6 @@ make -C buildroot-src BR2_EXTERNAL=$(pwd) busybox-menuconfig
 # Note: Ensure BR2_PACKAGE_BUSYBOX_CONFIG is set to point to your custom config file
 make -C buildroot-src BR2_EXTERNAL=$(pwd) busybox-update-config
 ```
-Note: Just like with the kernel, after saving your changes, simply run the main build command to apply them:
-
-```bash
-make -C buildroot-src BR2_EXTERNAL=$(pwd)
-```
 
 ## Project Structure
 
@@ -118,7 +106,8 @@ make -C buildroot-src BR2_EXTERNAL=$(pwd)
 
 `board/rgnx/rootfs-overlay/` - A directory whose content is copied directly to the target file system (use this for custom scripts and config files in /etc).
 
-Note: Always ensure that BR2_ROOTFS_OVERLAY in menuconfig points to board/rgnx/rootfs-overlay to include your custom files in the final build.
+`board/rgnx/post-image.sh` - Building system images
+
 
 ## Clean
  
