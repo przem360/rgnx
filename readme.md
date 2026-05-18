@@ -23,7 +23,11 @@ Once the build is finished, the output files can be found in the output/images/ 
 ## Install on the drive
 
 ```bash
-sudo dd if=rgnx.img of=/dev/sdb bs=4M status=progress
+sudo dd if=buildroot-src/output/images/rgnx_disk.img of=/dev/sdb bs=4M status=progress
+```
+or:
+```bash
+sudo dd if=buildroot-src/output/images/rgnx_live.img of=/dev/sdb bs=4M status=progress
 ```
 
 ## Running in QEMU Emulator
@@ -32,21 +36,29 @@ To test the built image, use the following command:
 
 ```bash
 qemu-system-i386 \
-    -m 128M \
+    -m 256M \
     -cpu pentium2-v1 \
-    -drive file=buildroot-src/output/images/rgnx_live.img,format=raw \
-    -vga std
+    -device ahci,id=ahci \
+    -drive file=buildroot-src/output/images/rgnx_live.img,if=none,id=drive0,format=raw \
+    -device ide-hd,drive=drive0,bus=ahci.0 \
+    -vga std \
+    -audiodev pa,id=snd0 \
+    -device intel-hda -device hda-duplex,audiodev=snd0 \
+    -machine pc-q35-7.2
 ```
 or:
 
 ```bash
 qemu-system-i386 \
-    -m 128M \
+    -m 256M \
     -cpu pentium2-v1 \
     -device ahci,id=ahci \
     -drive file=buildroot-src/output/images/rgnx_disk.img,if=none,id=drive0,format=raw \
     -device ide-hd,drive=drive0,bus=ahci.0 \
-    -vga std
+    -vga std \
+    -audiodev pa,id=snd0 \
+    -device intel-hda -device hda-duplex,audiodev=snd0 \
+    -machine pc-q35-7.2
 ```
 
 ## Configuration Management Rules
