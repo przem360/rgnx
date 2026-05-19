@@ -53,7 +53,7 @@ DEFAULT rgnx
 LABEL rgnx
   SAY [ BOOTING RGNX FROM DISK (PARTUUID) ]
   KERNEL bzImage
-  APPEND console=tty1 vga=0x344 loglevel=7 root=PARTUUID=${DISK_ID}-02 rw rootwait rootfstype=ext4 init=/sbin/init
+  APPEND console=tty1 vga=0x344 loglevel=3 root=PARTUUID=${DISK_ID}-02 rw rootwait rootfstype=ext4 init=/sbin/init
 EOF
 
 mformat -i "${DISK_IMG}@@1M" -F -v "RGNX_BOOT" -t ${BOOT_SIZE} -h 64 -s 32
