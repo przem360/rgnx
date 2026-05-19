@@ -1,2 +1,3 @@
 # Adding to "External options"
 source "$BR2_EXTERNAL_RGNX_PATH/package/smsplus-gx/Config.in"
+source "$BR2_EXTERNAL_RGNX_PATH/package/tenes/Config.in"

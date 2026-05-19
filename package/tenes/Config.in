@@ -1,0 +1,8 @@
+config BR2_PACKAGE_TENES
+	bool "tenes"
+	depends on BR2_PACKAGE_SDL
+	select BR2_PACKAGE_FREETYPE
+	select BR2_PACKAGE_SDL_IMAGE
+	help
+	  Tenes is a lightweight NES (Nintendo Entertainment System) 
+	  emulator based on SDL 1.2 and FreeType2.
