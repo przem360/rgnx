@@ -1,0 +1,6 @@
+config BR2_PACKAGE_GNUBOY
+	bool "gnuboy"
+	depends on BR2_PACKAGE_SDL
+	help
+	  Gnuboy is a classic, ultra-fast Game Boy and Game Boy Color 
+	  emulator revived for modern compilers.
