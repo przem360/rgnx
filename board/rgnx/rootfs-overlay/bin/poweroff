@@ -1,0 +1,8 @@
+#!/bin/sh
+echo "POWEROFF initiated..."
+
+echo s > /proc/sysrq-trigger
+
+echo u > /proc/sysrq-trigger
+
+/sbin/poweroff -f
