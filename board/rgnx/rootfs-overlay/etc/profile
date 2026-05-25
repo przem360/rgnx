@@ -9,7 +9,13 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias ll='ls -la --color=auto'
 
+export LANG=pl_PL.UTF-8
+export LC_ALL=pl_PL.UTF-8
+export TERM=linux
+
 export SDL_VIDEODRIVER=fbcon
 export SDL_NOMOUSE=1
 
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+
+setfont /usr/share/consolefonts/Lat2-Terminus16.psfu

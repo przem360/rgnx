@@ -1,0 +1,8 @@
+config BR2_PACKAGE_TCC
+	bool "tcc"
+	help
+	  Tiny C Compiler - to mniejszy, niezwykle szybki kompilator C,
+	  który potrafi uruchamiać pliki źródłowe C bezpośrednio jako
+	  skrypty za pomocą flagi -run. Idealny dla systemów wbudowanych.
+
+	  http://bellard.org/tcc/

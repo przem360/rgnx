@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# /etc/init.d/S20resize-rootfs
+#
+
+case "$1" in
+  start)
+    FLAG_FILE="/etc/.rootfs_resized"
+
+    if [ ! -f "$FLAG_FILE" ]; then
+        echo "=== RGNX: First boot. Expanding filesystem... ==="
+        
+        REAL_ROOT=$(awk '$2 == "/" {print $1}' /proc/mounts 2>/dev/null)
+
+        if [ "$REAL_ROOT" = "rootfs" ] || [ "$REAL_ROOT" = "/dev/root" ] || [ -z "$REAL_ROOT" ]; then
+            echo "Searching in cmdline..."
+            
+            PARTUUID_VAL=$(cat /proc/cmdline | grep -o 'root=PARTUUID=[^ ]*' | cut -d= -f3)
+            
+            if [ -n "$PARTUUID_VAL" ] && command -v blkid >/dev/null 2>&1; then
+                REAL_ROOT=$(blkid | grep -i "$PARTUUID_VAL" | cut -d: -f1)
+            fi
+        fi
+
+        if [ -z "$REAL_ROOT" ]; then
+            if [ -b /dev/sda2 ]; then
+                REAL_ROOT="/dev/sda2"
+            elif [ -b /dev/vda2 ]; then
+                REAL_ROOT="/dev/vda2"
+            fi
+        fi
+
+        echo "RGNX: Detected rootfs: $REAL_ROOT"
+
+        if [ -n "$REAL_ROOT" ] && [ -b "$REAL_ROOT" ]; then
+            DISK_DEV=$(echo "$REAL_ROOT" | sed 's/[0-9]*$//')
+            
+            if command -v partprobe >/dev/null 2>&1; then
+                partprobe "$DISK_DEV" 2>/dev/null || true
+            fi
+
+            if resize2fs "$REAL_ROOT"; then
+                echo "=== Done. ==="
+                #touch "$FLAG_FILE"
+                echo >> "$FLAG_FILE"
+            else
+                echo "=== ERROR: resize2fs failed. ==="
+            fi
+        else
+            echo "=== ERROR: Could not find proper block device for rootfs ($REAL_ROOT)! ==="
+        fi
+    fi
+    ;;
+  stop)
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+esac
+
+exit 0

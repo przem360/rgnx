@@ -3,7 +3,6 @@
 # =================================================================
 
 # 1. Ignore the entire Buildroot source directory
-# (This keeps your repo clean of thousands of external files)
 /buildroot-2026.02.1/
 
 # 2. Ignore any local build artifacts or temporary files
@@ -11,6 +10,8 @@
 *.log
 *.tmp
 *.swp
+*.tar.gz
+*.tar.xz
 .DS_Store
 
 # 3. Ignore submodule build artifacts
@@ -18,6 +19,7 @@
 /buildroot-src/dl/
 /buildroot-src/.config
 /buildroot-src/.config.old
+/tcc_package/
 
 # 4. If you ever decide to run a build that creates an 'output' 
 # folder in the root directory, ignore it too

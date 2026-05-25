@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "Loading keymap: pl2.map"
+
+loadkeys /etc/keymaps/pl2.map
+
+echo -ne "\033%G"
+

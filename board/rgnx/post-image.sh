@@ -9,7 +9,7 @@ DISK_IMG="${IMG_DIR}/rgnx_disk.img"
 BOOT_VFAT="${IMG_DIR}/boot.vfat"
 ROOT_EXT4="${IMG_DIR}/rootfs.ext4"
 
-# Rozmiary
+# Size
 BOOT_SIZE=64 
 DISK_TOTAL_SIZE=450
 

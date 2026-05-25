@@ -1,0 +1,12 @@
+config BR2_PACKAGE_DGEN
+	bool "dgen"
+	depends on BR2_i386
+	depends on BR2_INSTALL_LIBSTDCPP # rally?
+	select BR2_PACKAGE_SDL
+	select BR2_PACKAGE_ZLIB
+	help
+	  DGen/SDL to otwartoźródłowy emulator konsoli 
+	  Sega Mega Drive / Genesis dla systemów Unix.
+
+	  http://sourceforge.net/projects/dgen
+

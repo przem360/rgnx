@@ -1,0 +1,10 @@
+config BR2_PACKAGE_NOFRENDO
+	bool "nofrendo"
+	depends on BR2_i386 # Pilnujemy, aby pakiet był widoczny tylko dla platformy x86 32-bit
+	select BR2_PACKAGE_SDL
+	select BR2_PACKAGE_ZLIB
+	help
+	  Nofrendo jest lekkim, klasycznym emulatorem NES,
+	  idealnym dla procesorów klasy i386 / i486.
+
+	  http://www.conte.com/nofrendo/
