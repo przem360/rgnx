@@ -1,0 +1,11 @@
+config BR2_PACKAGE_POCKETSNES
+	bool "pocketsnes"
+	select BR2_PACKAGE_SDL
+	select BR2_PACKAGE_SDL_IMAGE
+	select BR2_PACKAGE_ZLIB
+	select BR2_PACKAGE_LIBPNG
+	help
+	  PocketSNES is an emulator of Super Nintendo (SNES) based on
+	  snes9x 1.43, works with SDL 1.2
+
+	  https://github.com/przem360/rgnx_pocketsnes

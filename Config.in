@@ -4,4 +4,6 @@ source "$BR2_EXTERNAL_RGNX_PATH/package/tenes/Config.in"
 source "$BR2_EXTERNAL_RGNX_PATH/package/nofrendo/Config.in"
 source "$BR2_EXTERNAL_RGNX_PATH/package/gnuboy/Config.in"
 source "$BR2_EXTERNAL_RGNX_PATH/package/dgen/Config.in"
+source "$BR2_EXTERNAL_RGNX_PATH/package/pocketsnes/Config.in"
 source "$BR2_EXTERNAL_RGNX_PATH/package/tcc/Config.in"
+
